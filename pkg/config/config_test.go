@@ -2,6 +2,7 @@ package config
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -33,7 +34,7 @@ func TestSkipKindMaps(t *testing.T) {
 			},
 		},
 	} {
-		got := splitCSV(testCase.csvSkipKinds)
+		got := strings.Split(testCase.csvSkipKinds, ",")
 		if !reflect.DeepEqual(got, testCase.expect) {
 			t.Errorf("%s - got %+v, expected %+v", testCase.name, got, testCase.expect)
 		}
@@ -53,8 +54,8 @@ func TestFromFlags(t *testing.T) {
 				NumberOfWorkers:   4,
 				OutputFormat:      "text",
 				SchemaLocations:   nil,
-				SkipKinds:         map[string]struct{}{},
-				RejectKinds:       map[string]struct{}{},
+				SkipKinds:         []string{},
+				RejectKinds:       []string{},
 			},
 		},
 		{
@@ -66,8 +67,8 @@ func TestFromFlags(t *testing.T) {
 				NumberOfWorkers:   4,
 				OutputFormat:      "text",
 				SchemaLocations:   nil,
-				SkipKinds:         map[string]struct{}{},
-				RejectKinds:       map[string]struct{}{},
+				SkipKinds:         []string{},
+				RejectKinds:       []string{},
 			},
 		},
 		{
@@ -79,8 +80,8 @@ func TestFromFlags(t *testing.T) {
 				NumberOfWorkers:   4,
 				OutputFormat:      "text",
 				SchemaLocations:   nil,
-				SkipKinds:         map[string]struct{}{},
-				RejectKinds:       map[string]struct{}{},
+				SkipKinds:         []string{},
+				RejectKinds:       []string{},
 			},
 		},
 		{
@@ -91,8 +92,8 @@ func TestFromFlags(t *testing.T) {
 				NumberOfWorkers:   4,
 				OutputFormat:      "text",
 				SchemaLocations:   nil,
-				SkipKinds:         map[string]struct{}{"a": {}, "b": {}, "c": {}},
-				RejectKinds:       map[string]struct{}{},
+				SkipKinds:         []string{"a", "b", "c"},
+				RejectKinds:       []string{},
 			},
 		},
 		{
@@ -103,8 +104,8 @@ func TestFromFlags(t *testing.T) {
 				NumberOfWorkers:   4,
 				OutputFormat:      "text",
 				SchemaLocations:   nil,
-				SkipKinds:         map[string]struct{}{},
-				RejectKinds:       map[string]struct{}{},
+				SkipKinds:         []string{},
+				RejectKinds:       []string{},
 				Summary:           true,
 				Verbose:           true,
 			},
@@ -122,8 +123,8 @@ func TestFromFlags(t *testing.T) {
 				NumberOfWorkers:      2,
 				OutputFormat:         "json",
 				SchemaLocations:      []string{"folder", "anotherfolder"},
-				SkipKinds:            map[string]struct{}{"kinda": {}, "kindb": {}},
-				RejectKinds:          map[string]struct{}{"kindc": {}, "kindd": {}},
+				SkipKinds:            []string{"kinda", "kindb"},
+				RejectKinds:          []string{"kindc", "kindd"},
 				Strict:               true,
 				Summary:              true,
 				Verbose:              true,

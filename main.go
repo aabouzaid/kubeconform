@@ -16,5 +16,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "failed parsing command line: %s\n", err.Error())
 		os.Exit(1)
 	}
-	os.Exit(kubeconform.Validate(cfg, out))
+
+	if err = kubeconform.Validate(cfg, out); err != nil {
+		fmt.Fprintf(os.Stderr, "failed validating resources: %s - %s\n", err.Error(), out)
+		os.Exit(1)
+	}
 }

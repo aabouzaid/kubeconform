@@ -12,6 +12,7 @@ import (
 	"github.com/yannh/kubeconform/pkg/cache"
 	"github.com/yannh/kubeconform/pkg/registry"
 	"github.com/yannh/kubeconform/pkg/resource"
+	"github.com/yannh/kubeconform/pkg/utils"
 	"sigs.k8s.io/yaml"
 )
 
@@ -53,14 +54,14 @@ type Validator interface {
 
 // Opts contains a set of options for the validator.
 type Opts struct {
-	Cache                string              // Cache schemas downloaded via HTTP to this folder
-	Debug                bool                // Debug infos will be print here
-	SkipTLS              bool                // skip TLS validation when downloading from an HTTP Schema Registry
-	SkipKinds            map[string]struct{} // List of resource Kinds to ignore
-	RejectKinds          map[string]struct{} // List of resource Kinds to reject
-	KubernetesVersion    string              // Kubernetes Version - has to match one in https://github.com/instrumenta/kubernetes-json-schema
-	Strict               bool                // thros an error if resources contain undocumented fields
-	IgnoreMissingSchemas bool                // skip a resource if no schema for that resource can be found
+	Cache                string   // Cache schemas downloaded via HTTP to this folder
+	Debug                bool     // Debug infos will be print here
+	SkipTLS              bool     // skip TLS validation when downloading from an HTTP Schema Registry
+	SkipKinds            []string // List of resource Kinds to ignore
+	RejectKinds          []string // List of resource Kinds to reject
+	KubernetesVersion    string   // Kubernetes Version - has to match one in https://github.com/instrumenta/kubernetes-json-schema
+	Strict               bool     // thros an error if resources contain undocumented fields
+	IgnoreMissingSchemas bool     // skip a resource if no schema for that resource can be found
 }
 
 // New returns a new Validator
@@ -85,10 +86,10 @@ func New(schemaLocations []string, opts Opts) (Validator, error) {
 	}
 
 	if opts.SkipKinds == nil {
-		opts.SkipKinds = map[string]struct{}{}
+		opts.SkipKinds = []string{}
 	}
 	if opts.RejectKinds == nil {
-		opts.RejectKinds = map[string]struct{}{}
+		opts.RejectKinds = []string{}
 	}
 
 	return &v{
@@ -115,19 +116,17 @@ func (val *v) ValidateResource(res resource.Resource) Result {
 	// for skipping/rejecting resources) and the raw Kind.
 
 	skip := func(signature resource.Signature) bool {
-		if _, ok := val.opts.SkipKinds[signature.GroupVersionKind()]; ok {
+		if ok := utils.InArray(val.opts.SkipKinds, signature.GroupVersionKind()); ok {
 			return ok
 		}
-		_, ok := val.opts.SkipKinds[signature.Kind]
-		return ok
+		return utils.InArray(val.opts.SkipKinds, signature.Kind)
 	}
 
 	reject := func(signature resource.Signature) bool {
-		if _, ok := val.opts.RejectKinds[signature.GroupVersionKind()]; ok {
+		if ok := utils.InArray(val.opts.RejectKinds, signature.GroupVersionKind()); ok {
 			return ok
 		}
-		_, ok := val.opts.RejectKinds[signature.Kind]
-		return ok
+		return utils.InArray(val.opts.RejectKinds, signature.Kind)
 	}
 
 	if len(res.Bytes) == 0 {

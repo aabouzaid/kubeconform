@@ -44,21 +44,19 @@ func processResults(cancel context.CancelFunc, o output.Output, validationResult
 	return result
 }
 
-func Validate(cfg config.Config, out string) int {
+func Validate(cfg config.Config, out string) error {
+
 	if out != "" {
-		o := cfg.Stream.Error
-		errCode := 1
 		if cfg.Help {
-			o = cfg.Stream.Output
-			errCode = 0
+			fmt.Fprintln(cfg.Stream.Output, out)
+			return nil
 		}
-		fmt.Fprintln(o, out)
-		return errCode
+		return fmt.Errorf("config out is not empty")
 	}
 
 	if cfg.Version {
 		fmt.Fprintln(cfg.Stream.Output, out)
-		return 0
+		return nil
 	}
 
 	cpuProfileFile := os.Getenv("KUBECONFORM_CPUPROFILE_FILE")
@@ -87,8 +85,7 @@ func Validate(cfg config.Config, out string) int {
 
 	o, err := output.New(cfg.Stream.Output, cfg.OutputFormat, cfg.Summary, useStdin, cfg.Verbose)
 	if err != nil {
-		fmt.Fprintln(cfg.Stream.Error, err)
-		return 1
+		return fmt.Errorf("failed to get output: %s", err.Error())
 	}
 	v, err := validator.New(cfg.SchemaLocations, validator.Opts{
 		Cache:                cfg.Cache,
@@ -101,8 +98,7 @@ func Validate(cfg config.Config, out string) int {
 		IgnoreMissingSchemas: cfg.IgnoreMissingSchemas,
 	})
 	if err != nil {
-		fmt.Fprintln(cfg.Stream.Error, err)
-		return 1
+		return fmt.Errorf("failed to validate: %s", err.Error())
 	}
 
 	validationResults := make(chan validator.Result)
@@ -162,8 +158,8 @@ func Validate(cfg config.Config, out string) int {
 	o.Flush()
 
 	if !success {
-		return 1
+		return fmt.Errorf("failed to process results")
 	}
 
-	return 0
+	return nil
 }

@@ -355,8 +355,8 @@ lastName: bar
 	} {
 		val := v{
 			opts: Opts{
-				SkipKinds:            map[string]struct{}{},
-				RejectKinds:          map[string]struct{}{},
+				SkipKinds:            []string{},
+				RejectKinds:          []string{},
 				IgnoreMissingSchemas: testCase.ignoreMissingSchema,
 				Strict:               testCase.strict,
 			},
@@ -418,8 +418,8 @@ age: not a number
 
 	val := v{
 		opts: Opts{
-			SkipKinds:   map[string]struct{}{},
-			RejectKinds: map[string]struct{}{},
+			SkipKinds:   []string{},
+			RejectKinds: []string{},
 		},
 		schemaCache:    nil,
 		schemaDownload: downloadSchema,

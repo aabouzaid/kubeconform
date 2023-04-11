@@ -16,24 +16,24 @@ type Stream struct {
 }
 
 type Config struct {
-	Cache                  string
-	Debug                  bool
-	ExitOnError            bool
-	Files                  []string
-	SchemaLocations        []string
-	SkipTLS                bool
-	SkipKinds              map[string]struct{}
-	RejectKinds            map[string]struct{}
-	OutputFormat           string
-	KubernetesVersion      string
-	NumberOfWorkers        int
-	Summary                bool
-	Strict                 bool
-	Verbose                bool
-	IgnoreMissingSchemas   bool
-	IgnoreFilenamePatterns []string
-	Help                   bool
-	Version                bool
+	Cache                  string   `yaml:"cache" json:"cache"`
+	Debug                  bool     `yaml:"debug" json:"debug"`
+	ExitOnError            bool     `yaml:"exitOnError" json:"exitOnError"`
+	Files                  []string `yaml:"files" json:"files"`
+	Help                   bool     `yaml:"help" json:"help"`
+	IgnoreFilenamePatterns []string `yaml:"ignoreFilenamePatterns" json:"ignoreFilenamePatterns"`
+	IgnoreMissingSchemas   bool     `yaml:"ignoreMissingSchemas" json:"ignoreMissingSchemas"`
+	KubernetesVersion      string   `yaml:"kubernetesVersion" json:"kubernetesVersion"`
+	NumberOfWorkers        int      `yaml:"numberOfWorkers" json:"numberOfWorkers"`
+	OutputFormat           string   `yaml:"output" json:"output"`
+	RejectKinds            []string `yaml:"reject" json:"reject"`
+	SchemaLocations        []string `yaml:"schemaLocations" json:"schemaLocations"`
+	SkipKinds              []string `yaml:"skip" json:"skip"`
+	SkipTLS                bool     `yaml:"insecureSkipTLSVerify" json:"insecureSkipTLSVerify"`
+	Strict                 bool     `yaml:"strict" json:"strict"`
+	Summary                bool     `yaml:"summary" json:"summary"`
+	Verbose                bool     `yaml:"verbose" json:"verbose"`
+	Version                bool     `yaml:"version" json:"version"`
 	Stream                 *Stream
 }
 
@@ -46,19 +46,6 @@ func (ap *arrayParam) String() string {
 func (ap *arrayParam) Set(value string) error {
 	*ap = append(*ap, value)
 	return nil
-}
-
-func splitCSV(csvStr string) map[string]struct{} {
-	splitValues := strings.Split(csvStr, ",")
-	valuesMap := map[string]struct{}{}
-
-	for _, kind := range splitValues {
-		if len(kind) > 0 {
-			valuesMap[kind] = struct{}{}
-		}
-	}
-
-	return valuesMap
 }
 
 // FromFlags retrieves kubeconform's runtime configuration from the command-line parameters
@@ -98,8 +85,8 @@ func FromFlags(progName string, args []string) (Config, string, error) {
 
 	err := flags.Parse(args)
 
-	c.SkipKinds = splitCSV(skipKindsCSV)
-	c.RejectKinds = splitCSV(rejectKindsCSV)
+	c.SkipKinds = strings.Split(skipKindsCSV, ",")
+	c.RejectKinds = strings.Split(rejectKindsCSV, ",")
 	c.IgnoreFilenamePatterns = ignoreFilenamePatterns
 	c.SchemaLocations = schemaLocationsParam
 	c.Files = flags.Args()
